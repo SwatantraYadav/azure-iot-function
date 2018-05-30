@@ -35,7 +35,7 @@ namespace Common.Client
             }
         }
 
-        public async Task SendDataToCloudAsync<T>(T data, int retry)
+        public async Task SendTelemetryDataAsync<T>(T data, int retry)
         {
             try
             {
@@ -51,13 +51,13 @@ namespace Common.Client
                 {
                     if (TryConnect(IoTToken))
                     {
-                        await SendDataToCloudAsync(data, --retry);
+                        await SendTelemetryDataAsync(data, --retry);
                     }
                 }
             }
         }
 
-        public async Task SendDataToStorageAsync<T>(T data, int retry)
+        public async Task SendStorageDataAsync<T>(T data, int retry)
         {
             try
             {
@@ -70,12 +70,12 @@ namespace Common.Client
             }
             catch (Exception ex)
             {
-                Console.Write($"SendDataToStorageAsync {ex}");
+                Console.Write($"SendStorageDataAsync {ex}");
                 if (retry > 0)
                 {
                     if (TryConnect(IoTToken))
                     {
-                        await SendDataToStorageAsync(data, --retry);
+                        await SendStorageDataAsync(data, --retry);
                     }
                 }
             }

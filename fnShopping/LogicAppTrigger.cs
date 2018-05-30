@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -8,11 +9,9 @@ using Common.Data;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Azure.WebJobs.Host;
-using Newtonsoft.Json;
-using Microsoft.Azure.Storage;
-using Microsoft.Azure.CosmosDB.Table;
 using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.Table;
+using Newtonsoft.Json;
 
 namespace fnShopping
 {
@@ -22,10 +21,10 @@ namespace fnShopping
         public static async Task<HttpResponseMessage> Run([HttpTrigger(AuthorizationLevel.Function, "get", "post", Route = null)]HttpRequestMessage req, TraceWriter log)
         {
             log.Info("C# HTTP trigger function processed a request.");
-            var message = req.Content?.ReadAsStringAsync().Result;
+            var message = await req.Content?.ReadAsStringAsync();
             // parse query parameter
+            log.Info("Message content: " + message);
 
-            
             if (message == null)
             {
                 // Get request body
@@ -33,23 +32,45 @@ namespace fnShopping
             }
 
             var messageObj = JsonConvert.DeserializeObject<LogicAppMessage>(message);
-            var device = messageObj?.Properties.iothubconnectiondeviceid;
+            
+            var device = messageObj.Properties.iothubconnectiondeviceid;
+            log.Info("Device 1: " + device);
+            if (string.IsNullOrEmpty(device))
+            {
+                int start = message.IndexOf("iothub-connection-device-id") + "iothub-connection-device-id".Length + 3;
+                int end = message.IndexOf("iothub-connection-auth-method") - 3;
+                int length = end - start + 1;
+                device = message.Substring(start, length);
+            }
+
+            log.Info("Device 2: " + device);
+
             var actualMessageBase64 = messageObj.ContentData;
             byte[] buffer = Convert.FromBase64String(actualMessageBase64);
             string converted = Encoding.UTF8.GetString(buffer, 0, buffer.Length);
-            log.Info("Message content " + converted);
+            log.Info("Message content data: " + converted);
 
-            var data = JsonConvert.DeserializeObject<LogicAppData>(converted);
+            try
+            {
+                var parent = (List<PrintBaseServer>)JsonConvert.DeserializeObject(converted, typeof(List<PrintBaseServer>));
 
-
-            var connectionString = "DefaultEndpointsProtocol=https;AccountName=dbserverlesscosmos;AccountKey=66sGoaHZlOVR4YNqvipbOurp55fINYHlm0r4RtqmGPeDISJXJflmOaYSbPwxNPrM2ELwPE9kowNoFVR7sFUWDA==;TableEndpoint=https://dbserverlesscosmos.table.cosmosdb.azure.com:443/;";
-            CloudStorageAccount storageAccount = CloudStorageAccount.Parse(connectionString);
-            CloudTableClient tableClient = storageAccount.CreateCloudTableClient();
-
-            tableClient.GetTableReference("")
+                var table = await TableStorage.CreateTableAsync("PrintTable", log);
+                foreach (var data in parent)
+                {
+                    log.Info($"Inserting {device} {data.Photo} {data.Quantity} ");
+                    var saved = await TableStorage.InsertPrintAsync(table, data, device, log);
+                    log.Info("saved content " + saved);
+                }
+            }
+            catch (Exception ex)
+            {
+                log.Error("Failed save " + ex.ToString());
+            }
             return message == null
                 ? req.CreateResponse(HttpStatusCode.BadRequest, "Please pass a name on the query string or in the request body")
                 : req.CreateResponse(HttpStatusCode.OK, "Hello " + converted);
         }
+
     }
+
 }

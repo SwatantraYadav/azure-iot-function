@@ -8,7 +8,7 @@ namespace Common.Data
 {
     public class LogicAppData
     {
-        public PrintBaseServer[] Property1 { get; set; }
+        public List<PrintBaseServer> PrintList { get; set; }
     }
 
     public class PrintBaseServer

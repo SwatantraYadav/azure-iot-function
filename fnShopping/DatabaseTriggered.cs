@@ -9,7 +9,7 @@ namespace fnShopping
     {
         [FunctionName("DatabaseTriggered")]
         public static void Run([CosmosDBTrigger(
-            databaseName: "shoppingdb",
+            databaseName: "TablesDB",
             collectionName: "PrintList",
             ConnectionStringSetting = "DefaultEndpointsProtocol=https;AccountName=dbserverlesscosmos;AccountKey=66sGoaHZlOVR4YNqvipbOurp55fINYHlm0r4RtqmGPeDISJXJflmOaYSbPwxNPrM2ELwPE9kowNoFVR7sFUWDA==;TableEndpoint=https://dbserverlesscosmos.table.cosmosdb.azure.com:443/;",
             LeaseCollectionName = "leases")]IReadOnlyList<Document> documents, TraceWriter log)

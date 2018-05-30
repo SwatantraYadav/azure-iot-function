@@ -138,9 +138,9 @@ namespace PhotoStoreDemo
                 var progressAnimation = new DoubleAnimation(0, 100, scaleDuration, FillBehavior.Stop);
                 UploadProgressBar.BeginAnimation(RangeBase.ValueProperty, progressAnimation);
                 InitializeIoTClient();
-                _iotClient.SendDataToCloudAsync(ShoppingCart, 3);
+                _iotClient.SendTelemetryDataAsync(ShoppingCart, 3);
 
-                _iotClient.SendDataToStorageAsync(ShoppingCart, 3);
+                _iotClient.SendStorageDataAsync(ShoppingCart, 3);
                 _iotClient.SendDataToServiceBusAsync(ShoppingCart, 3);
 
                 // ShoppingCart.Clear();
