@@ -1,9 +1,9 @@
 ﻿using Newtonsoft.Json;
-using ShoppingCommon.Model;
+using Common.Data.Model;
 using System;
 using System.IO;
 
-namespace ShoppingCommon.Service
+namespace Common.Client
 {
     public class FileHelper
     {

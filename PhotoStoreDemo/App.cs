@@ -1,8 +1,8 @@
 ﻿// // Copyright (c) Microsoft. All rights reserved.
 // // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using ShoppingCommon.Model;
-using ShoppingCommon.Service;
+using Common.Client;
+using Common.Data.Model;
 using System.Windows;
 
 namespace PhotoStoreDemo

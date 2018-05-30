@@ -1,6 +1,5 @@
-﻿using ShoppingCommon;
-using ShoppingCommon.Model;
-using ShoppingCommon.Service;
+﻿using Common.Client;
+using Common.Data.Model;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -32,35 +31,48 @@ namespace PhotoStoreDemo
 
         private async void Register_Click(object sender, RoutedEventArgs e)
         {
-            var email = this.txtEmail.Text;
-            string pattern = @"^(([\w-]+\.)+[\w-]+|([a-zA-Z]{1}|[\w-]{2,}))@"
-                             + @"((([0-1]?[0-9]{1,2}|25[0-5]|2[0-4][0-9])\.([0-1]?
+            try
+            {
+                this.Cursor = Cursors.Wait;
+                var email = this.txtEmail.Text;
+                string pattern = @"^(([\w-]+\.)+[\w-]+|([a-zA-Z]{1}|[\w-]{2,}))@"
+                                 + @"((([0-1]?[0-9]{1,2}|25[0-5]|2[0-4][0-9])\.([0-1]?
 				                        [0-9]{1,2}|25[0-5]|2[0-4][0-9])\."
-                             + @"([0-1]?[0-9]{1,2}|25[0-5]|2[0-4][0-9])\.([0-1]?
+                                 + @"([0-1]?[0-9]{1,2}|25[0-5]|2[0-4][0-9])\.([0-1]?
 				                        [0-9]{1,2}|25[0-5]|2[0-4][0-9])){1}|"
-                             + @"([a-zA-Z0-9]+[\w-]+\.)+[a-zA-Z]{1}[a-zA-Z0-9-]{1,23})$";
-            Regex reg = new Regex(pattern);
-            if(!reg.Match(email).Success)
-            {
-                MessageBox.Show("Invalid email");
-                return;
+                                 + @"([a-zA-Z0-9]+[\w-]+\.)+[a-zA-Z]{1}[a-zA-Z0-9-]{1,23})$";
+                Regex reg = new Regex(pattern);
+                if (!reg.Match(email).Success)
+                {
+                    MessageBox.Show("Invalid email");
+                    return;
+                }
+
+                ManagedDevice device = new ManagedDevice()
+                {
+                    Email = email
+                };
+
+                var token = await HttpHelperService.Instance.RegisterDeviceAsync(device);
+
+                if (token != null)
+                {
+                    device.IoTToken = token;
+                    device.IsRegistered = true;
+                    Application.Current.Properties["State"] = device;
+                    FileHelper.SaveIoTClientState(device);
+                    Application.Current.MainWindow = new MainWindow();
+                    Application.Current.MainWindow.Show();
+                    this.Close();
+                }
             }
-
-            ManagedDevice device = new ManagedDevice() {
-                Email = email
-            };
-
-            var token = await HttpHelperService.Instance.RegisterDeviceAsync(device);
-
-            if(token != null)
+            catch (Exception ex)
             {
-                device.IoTToken = token;
-                device.IsRegistered = true;
-                Application.Current.Properties["State"] = device;
-                FileHelper.SaveIoTClientState(device);
-                Application.Current.MainWindow = new MainWindow();
-                Application.Current.MainWindow.Show();
-                this.Close();
+                Console.WriteLine($"{ex}");
+            }
+            finally
+            {
+                this.Cursor = Cursors.Arrow;
             }
         }
 

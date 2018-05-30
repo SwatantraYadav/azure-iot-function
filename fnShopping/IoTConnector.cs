@@ -1,4 +1,5 @@
-﻿using Microsoft.Azure.Devices;
+﻿using Common.Data;
+using Microsoft.Azure.Devices;
 using Microsoft.Azure.Devices.Common.Exceptions;
 using Microsoft.Azure.Devices.Common.Security;
 using System;
@@ -6,7 +7,7 @@ using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ShoppingCommon
+namespace fnShopping
 {
     public class IoTConnector : IDisposable
     {
@@ -55,7 +56,7 @@ namespace ShoppingCommon
             string err = null;
             try
             {
-                deviceId = deviceId.ToUpperInvariant();
+                deviceId = deviceId.ToLower();
                 var device = await registryManager.AddDeviceAsync(new Device(deviceId));
                 deviceKey = device.Authentication.SymmetricKey.PrimaryKey;
             }

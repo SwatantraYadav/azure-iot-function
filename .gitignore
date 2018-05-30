@@ -11,6 +11,8 @@ git/
 *.sln.docstates
 *.jfm 
 .vs/
+*.dll
+*.exe
 
 # Build results
 #[Dd]ebug/
@@ -183,3 +185,4 @@ AppPackages/
 
 *.msi
 *.exe
+/packages

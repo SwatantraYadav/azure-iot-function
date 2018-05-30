@@ -1,6 +1,8 @@
 ﻿// // Copyright (c) Microsoft. All rights reserved.
 // // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using Common.Client;
+using Common.Data.Model;
 using System;
 using System.Collections;
 using System.Windows;
@@ -24,17 +26,20 @@ namespace PhotoStoreDemo
         private RubberbandAdorner _cropSelector;
         public PhotoList Photos;
         public PrintList ShoppingCart;
+        private IoTClient _iotClient = null;
 
         public MainWindow()
         {
             _undoStack = new Stack();
             InitializeComponent();
+
+
         }
 
         private void WindowLoaded(object sender, EventArgs e)
         {
             var layer = AdornerLayer.GetAdornerLayer(CurrentPhoto);
-            _cropSelector = new RubberbandAdorner(CurrentPhoto) {Window = this};
+            _cropSelector = new RubberbandAdorner(CurrentPhoto) { Window = this };
             layer.Add(_cropSelector);
 #if VISUALCHILD
             CropSelector.Rubberband.Visibility = Visibility.Hidden;
@@ -43,9 +48,22 @@ namespace PhotoStoreDemo
             CropSelector.ShowRect = false;
 #endif
 
-            Photos = (PhotoList) (Application.Current.Resources["Photos"] as ObjectDataProvider)?.Data;
+            Photos = (PhotoList)(Application.Current.Resources["Photos"] as ObjectDataProvider)?.Data;
             Photos.Path = "..\\..\\Photos";
-            ShoppingCart = (PrintList) (Application.Current.Resources["ShoppingCart"] as ObjectDataProvider)?.Data;
+            ShoppingCart = (PrintList)(Application.Current.Resources["ShoppingCart"] as ObjectDataProvider)?.Data;
+
+            InitializeIoTClient();
+        }
+
+        private void InitializeIoTClient()
+        {
+            if (_iotClient != null) return;
+
+            string token = (Application.Current.Properties["State"] as ManagedDevice)?.IoTToken;
+            if (token != null)
+            {
+                _iotClient = new IoTClient(token);
+            }
         }
 
         private void PhotoListSelection(object sender, RoutedEventArgs e)
@@ -119,7 +137,13 @@ namespace PhotoStoreDemo
                 var scaleDuration = new TimeSpan(0, 0, 0, 0, ShoppingCart.Count*200);
                 var progressAnimation = new DoubleAnimation(0, 100, scaleDuration, FillBehavior.Stop);
                 UploadProgressBar.BeginAnimation(RangeBase.ValueProperty, progressAnimation);
-                ShoppingCart.Clear();
+                InitializeIoTClient();
+                _iotClient.SendDataToCloudAsync(ShoppingCart, 3);
+
+                _iotClient.SendDataToStorageAsync(ShoppingCart, 3);
+                _iotClient.SendDataToServiceBusAsync(ShoppingCart, 3);
+
+                // ShoppingCart.Clear();
                 UploadButton.IsEnabled = false;
                 if (RemoveButton.IsEnabled)
                     RemoveButton.IsEnabled = false;
@@ -231,6 +255,13 @@ namespace PhotoStoreDemo
         {
             _undoStack.Clear();
             UndoButton.IsEnabled = false;
+        }
+
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            var register = new Manage();
+            register.ShowDialog();
+      
         }
     }
 }

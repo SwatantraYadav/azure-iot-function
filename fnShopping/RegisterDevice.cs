@@ -7,8 +7,7 @@ using System.Threading.Tasks;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Azure.WebJobs.Host;
-using ShoppingCommon;
-using ShoppingCommon.Model;
+using Common.Data.Model;
 
 namespace fnShopping
 {
@@ -23,7 +22,7 @@ namespace fnShopping
             {
                 // Get request body
                 var deviceInfo = await req.Content.ReadAsAsync<ManagedDevice>();
-                var email = deviceInfo?.Email;
+                var email = deviceInfo?.Email?.ToLower();
                 log.Info($"C# EMAIL: {email}");
                 if (email == null)
                     return req.CreateResponse(HttpStatusCode.BadRequest, "noemail");

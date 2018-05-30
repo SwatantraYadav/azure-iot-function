@@ -129,7 +129,11 @@
     <Resource Include="Photos\winter1.jpg" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\ShoppingCommon\ShoppingCommon.csproj">
+    <ProjectReference Include="..\Common.Data\Common.Data.csproj">
+      <Project>{036BD4B8-3465-4073-925A-E75F6394FDDE}</Project>
+      <Name>Common.Data</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\ShoppingCommon\Common.Client.csproj">
       <Project>{3296a215-9ff3-4408-80ba-0f87a29ff9ab}</Project>
       <Name>ShoppingCommon</Name>
     </ProjectReference>

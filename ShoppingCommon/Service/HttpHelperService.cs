@@ -1,13 +1,14 @@
 ﻿using Newtonsoft.Json;
-using ShoppingCommon.Model;
+using Common.Data.Model;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
+using Common.Data;
 
-namespace ShoppingCommon
+namespace Common.Client
 {
     public class HttpHelperService
     {
